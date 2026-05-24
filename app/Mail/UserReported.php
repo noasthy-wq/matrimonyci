@@ -2,11 +2,10 @@
 
 namespace App\Mail;
 
+use App\Models\Report;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 class UserReported extends Mailable implements ShouldQueue
@@ -20,32 +19,23 @@ class UserReported extends Mailable implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($report)
+    public function __construct(Report $report)
     {
         $this->report = $report;
     }
 
     /**
-     * Get the message envelope.
+     * Build the message.
      *
-     * @return \Illuminate\Mail\Mailables\Envelope
+     * @return $this
      */
-    public function envelope()
+    public function build()
     {
-        return new Envelope(
-            subject: 'Un utilisateur a été signalé',
-        );
-    }
-
-    /**
-     * Get the message content definition.
-     *
-     * @return \Illuminate\Mail\Mailables\Content
-     */
-    public function content()
-    {
-        return new Content(
-            view: 'emails.user-reported',
-        );
+        return $this->subject('Votre profil a été signalé')
+            ->view('emails.user-reported')
+            ->with([
+                'reportedUser' => $this->report->reportedUser,
+                'reason' => $this->report->reason,
+            ]);
     }
 }

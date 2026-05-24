@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class VerifyTermsAccepted
 {
     /**
-     * Handle an incoming request.
+     * Vérifie que l'utilisateur a accepté les conditions d'utilisation
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
@@ -18,7 +18,7 @@ class VerifyTermsAccepted
     {
         if ($request->user() && !$request->user()->hasAcceptedTerms()) {
             return response()->json([
-                'message' => 'You must accept the terms and conditions to continue',
+                'message' => 'You must accept the terms of service',
             ], 403);
         }
 

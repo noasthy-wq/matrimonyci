@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 class LogActivity
 {
     /**
-     * Handle an incoming request.
+     * Enregistre les activités des utilisateurs
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
@@ -17,19 +17,18 @@ class LogActivity
      */
     public function handle(Request $request, Closure $next)
     {
-        $response = $next($request);
+        $user = $request->user();
 
-        if ($request->user()) {
+        if ($user) {
             Log::info('User Activity', [
-                'user_id' => $request->user()->id,
+                'user_id' => $user->id,
                 'method' => $request->method(),
                 'path' => $request->path(),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
-                'status' => $response->status(),
             ]);
         }
 
-        return $response;
+        return $next($request);
     }
 }

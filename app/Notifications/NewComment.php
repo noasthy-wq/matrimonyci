@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class NewComment extends Notification implements ShouldQueue
@@ -12,17 +11,15 @@ class NewComment extends Notification implements ShouldQueue
     use Queueable;
 
     public $comment;
-    public $author;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($comment, $author)
+    public function __construct($comment)
     {
         $this->comment = $comment;
-        $this->author = $author;
     }
 
     /**
@@ -33,21 +30,21 @@ class NewComment extends Notification implements ShouldQueue
      */
     public function via($notifiable)
     {
-        return ['mail'];
+        return ['database'];
     }
 
     /**
-     * Get the mail representation of the notification.
+     * Get the array representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
+     * @return array
      */
-    public function toMail($notifiable)
+    public function toArray($notifiable)
     {
-        return (new MailMessage)
-            ->subject('Nouveau commentaire sur votre profil')
-            ->line($this->author . ' a laissé un commentaire sur votre profil:')
-            ->line('"' . substr($this->comment, 0, 100) . '..."')
-            ->action('Voir le commentaire', url('/'));
+        return [
+            'message' => 'Vous avez reçu un nouveau commentaire',
+            'comment_id' => $this->comment->id,
+            'author' => $this->comment->user->name,
+        ];
     }
 }

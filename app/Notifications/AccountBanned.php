@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class AccountBanned extends Notification implements ShouldQueue
@@ -18,7 +17,7 @@ class AccountBanned extends Notification implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($reason = null)
+    public function __construct(string $reason = null)
     {
         $this->reason = $reason;
     }
@@ -31,7 +30,7 @@ class AccountBanned extends Notification implements ShouldQueue
      */
     public function via($notifiable)
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
 
     /**
@@ -42,12 +41,24 @@ class AccountBanned extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        return (new MailMessage)
-            ->subject('Votre compte a été suspendu')
-            ->line('Votre compte MatrimonyCI a été suspendu pour violation de nos conditions d\'utilisation.')
-            ->when($this->reason, function ($mail) {
-                return $mail->line('Raison: ' . $this->reason);
-            })
-            ->line('Si vous pensez que c\'est une erreur, veuillez nous contacter.');
+        return (new \Illuminate\Notifications\Messages\MailMessage)
+            ->subject('Votre compte a été banni')
+            ->line('Votre compte MatrimonyCI a été banni pour les raisons suivantes:')
+            ->line($this->reason ?? 'Violation des conditions d\'utilisation')
+            ->line('Si vous pensez qu\'il y a une erreur, veuillez contacter notre support.');
+    }
+
+    /**
+     * Get the array representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return array
+     */
+    public function toArray($notifiable)
+    {
+        return [
+            'message' => 'Votre compte a été banni',
+            'reason' => $this->reason,
+        ];
     }
 }

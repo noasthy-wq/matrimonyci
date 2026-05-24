@@ -33,13 +33,16 @@ class ModerateProfileMedia implements ShouldQueue
      */
     public function handle()
     {
-        if (!config('matrimony.moderation.enabled')) {
-            $this->media->approve();
-            return;
-        }
+        // Vérifier le fichier avec AWS Rekognition ou un autre service
+        // Pour ce template, on approuve simplement le fichier
 
-        // À implémenter avec AWS Rekognition ou un autre service
-        // Pour l'instant, on approuve automatiquement
-        $this->media->approve();
+        if (config('matrimony.moderation.enabled') && config('matrimony.moderation.service') === 'aws-rekognition') {
+            // Implémenter la logique AWS Rekognition ici
+            // Pour l'instant, on approuve automatiquement
+            $this->media->approve();
+        } else {
+            // Mode manuel
+            // Le fichier reste en attente de modération
+        }
     }
 }

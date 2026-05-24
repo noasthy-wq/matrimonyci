@@ -32,24 +32,30 @@ class ModerateComment implements ShouldQueue
      */
     public function handle()
     {
-        // Modération du contenu (vérification du texte)
+        // Ici, vous pouvez ajouter la logique de modération
+        // Par exemple, vérifier si le contenu contient des mots clés interdits
+        // ou utiliser un service comme AWS Rekognition
+
         $bannedWords = config('moderation.banned_words', []);
         $content = strtolower($this->comment->content);
-        
-        $hasBannedWords = false;
+
+        $containsBannedWord = false;
         foreach ($bannedWords as $word) {
             if (strpos($content, strtolower($word)) !== false) {
-                $hasBannedWords = true;
+                $containsBannedWord = true;
                 break;
             }
         }
 
-        if ($hasBannedWords) {
-            $this->comment->delete();
-            return;
+        if (!$containsBannedWord) {
+            $this->comment->update(['is_approved' => true]);
+        } else {
+            // Créer une violation
+            $this->comment->user->violations()->create([
+                'type' => 'warning',
+                'reason' => 'Inappropriate comment content',
+                'status' => 'active',
+            ]);
         }
-
-        // Approuver le commentaire
-        $this->comment->update(['is_approved' => true]);
     }
 }

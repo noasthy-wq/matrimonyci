@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use App\Services\PaymentService;
 
 class ProcessPayment implements ShouldQueue
 {
@@ -32,8 +33,11 @@ class ProcessPayment implements ShouldQueue
      */
     public function handle()
     {
-        // Traiter le paiement via le service de paiement
-        // Ce job peut être avancé pour gérer les retrées, les logs, etc.
-        \Log::info('Processing payment: ' . $this->payment->id);
+        $paymentService = new PaymentService();
+        $result = $paymentService->checkStatus($this->payment);
+
+        if ($result['success'] && $result['status'] === 'completed') {
+            $this->payment->markAsPaid();
+        }
     }
 }
